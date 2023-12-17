@@ -56,11 +56,18 @@ cp -R ./app/* build
 
 docker-rsync /usr/src/processing/coffeescript-transpilation/ /usr/src/processing/build/
 
+echo "build:"
+mkdir -p temp/app/app
+mv ./build/* ./temp/app/app/
+
+
 /usr/src/app/node_modules/.bin/babel \
-  ./build/ \
-  --out-dir ./typescript-transpilation/ \
-  --source-maps true \
+  ./temp/app/app/ \
+  --out-dir ./temp/typescript-transpilation/ \
+  --source-maps "both" \
   --extensions ".ts,.js"
+
+mv ./temp/typescript-transpilation/* ./typescript-transpilation/
 
 rm -Rf ./build
 mv typescript-transpilation /usr/src/build
@@ -92,9 +99,9 @@ cd /usr/src/processing/
 mkdir /usr/src/processing/built-mu
 /usr/src/app/node_modules/.bin/babel \
   /usr/src/processing/helpers/mu/ \
-  --source-maps true \
+  --source-maps "both" \
   --out-dir /usr/src/processing/built-mu \
-  --extensions ".js"
+  --extensions ".js,.ts"
 
 cp -R /usr/src/processing/built-mu /usr/src/build/node_modules/mu
 
