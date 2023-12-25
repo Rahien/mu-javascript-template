@@ -35,6 +35,7 @@ then
         # move new configuration into app for transpilation
         if [[ "$(ls -A /config 2> /dev/null)" ]]
         then
+            mkdir -p /app/src/config/
             cp -Rf /config/* /app/src/config/
         fi
 
@@ -51,7 +52,7 @@ then
 
         # add node modules from template back in
         docker-rsync /template/node_modules/ /app/node_modules/
-        ./transpile-sources.sh
+        /template/transpile-sources.sh
 
         # boot transpiled sources
         cd /app/
