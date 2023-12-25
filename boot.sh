@@ -2,11 +2,11 @@
 if [ "$NODE_ENV" == "development" ]
 then
     # Run live-reload development
-    exec /usr/src/app/node_modules/.bin/nodemon \
-         --watch /app \
+    exec /template/node_modules/.bin/nodemon \
+         --watch /app/src \
          --watch /config \
          --ext js,coffee,ts,mjs,cjs,json \
-         --exec /usr/src/app/run-development.sh
+         --exec /template/run-development.sh
 elif [ "$NODE_ENV" == "production" ]
 then
     diff -rq /app /app.original > /dev/null
@@ -14,7 +14,7 @@ then
     diff -rq /config /config.original > /dev/null
     CONFIG_FILES_CHANGED="$?"
 
-    if [ ! -f /usr/src/build/app.js ]
+    if [ ! -f /app/dist/app.js ]
     then
         echo "No built sources found.  If you mount new sources, please set the NODE_ENV=\"development\" environment variable."
         sleep 5;
@@ -28,7 +28,7 @@ then
     then
         echo "Rebuilding sources to include /config."
 
-        # move new configuration into app for transpilation
+        # move new configuration into app for transpilation TODO:karel what happens with config?
         if [[ "$(ls -A /config 2> /dev/null)" ]]
         then
             cp -Rf /config/* /usr/src/app/app/config/
