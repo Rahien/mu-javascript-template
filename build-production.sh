@@ -2,15 +2,14 @@
 
 # Builds sources in production
 #
-# We want to compare the used sources from the one available in /source
+# We want to compare the used sources from the one available in /app/src/
 # so we can warn at runtime in case developers accidentally mount
 # sources without setting the development environment variable.
 
 # Copy sources from /app to where they can be built
 cd /app
-rm -rf /build
-mkdir /build
-cp -r /app /build
+rm -rf /app/dist
+mkdir /app/dist
 
 mkdir -p /config /config.original
 
@@ -23,12 +22,15 @@ fi
 cp -r /app /app.original
 
 # Install custom packages if need be
-if [ -f /build/package.json ]
+if [ -f /app/src/package.json ]
 then
     echo "Running npm install"
-    cd /build/
+    cd /app/
+    cp /app/src/package.json /app/package.json
     npm install
-    cd /build/
 fi
 
-./transpile-sources.sh
+# add node modules from template back in
+docker-rsync /template/node_modules/ /app/node_modules/
+
+/template/transpile-sources.sh

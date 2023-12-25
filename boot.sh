@@ -1,3 +1,5 @@
+source /template/helpers.sh
+
 #!/bin/bash
 if [ "$NODE_ENV" == "development" ]
 then
@@ -10,7 +12,8 @@ then
          --exec /template/run-development.sh
 elif [ "$NODE_ENV" == "production" ]
 then
-    diff -rq /app /app.original > /dev/null
+    # diff but accept items created during build process
+    diff -x 'dist*' -x "node_modules" -x "package-lock.json" -x "package.json" -rq /app /app.original > /dev/null
     APP_FILES_CHANGED="$?"
     diff -rq /config /config.original > /dev/null
     CONFIG_FILES_CHANGED="$?"
@@ -29,10 +32,10 @@ then
     then
         echo "Rebuilding sources to include /config."
 
-        # move new configuration into app for transpilation TODO:karel what happens with config?
+        # move new configuration into app for transpilation
         if [[ "$(ls -A /config 2> /dev/null)" ]]
         then
-            cp -Rf /config/* /usr/src/app/app/config/
+            cp -Rf /config/* /app/src/config/
         fi
 
         # make a backup of the used configuration so we can detect changes
@@ -44,14 +47,19 @@ then
         fi
 
         # transpile sources
-        cd /usr/src/app/
+        cd /app/
+
+        # add node modules from template back in
+        docker-rsync /template/node_modules/ /app/node_modules/
         ./transpile-sources.sh
 
         # boot transpiled sources
-        cd /usr/src/build/
-        exec node ./app.js
+        cd /app/
+        exec node /app/dist/app.js
     else
-        cd /usr/src/build/
-        exec node ./app.js
+        cd /app/
+        # add node modules from template back in
+        docker-rsync /template/node_modules/ /app/node_modules/
+        exec node /app/dist/app.js
     fi
 fi

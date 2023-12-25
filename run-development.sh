@@ -23,6 +23,13 @@ cd /app/
 cmp -s /check/package.json /app/src/package.json
 CHANGE_IN_PACKAGE_JSON="$?"
 
+## Copy config folder
+if [[ "$(ls -A /config/ 2> /dev/null)" ]]
+then
+    mkdir -p /app/src/config/
+    cp -rf /config/* /app/src/config/
+fi
+
 ## Install dependencies on first boot
 if [ $CHANGE_IN_PACKAGE_JSON != "0" ] && [ -f /app/src/package.json ]
 then
