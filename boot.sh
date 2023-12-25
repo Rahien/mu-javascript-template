@@ -5,6 +5,7 @@ then
     exec /template/node_modules/.bin/nodemon \
          --watch /app/src \
          --watch /config \
+         --ignore /app/src/dist \
          --ext js,coffee,ts,mjs,cjs,json \
          --exec /template/run-development.sh
 elif [ "$NODE_ENV" == "production" ]
