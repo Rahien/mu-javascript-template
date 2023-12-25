@@ -56,18 +56,11 @@ cp -R ./app/* build
 
 docker-rsync /usr/src/processing/coffeescript-transpilation/ /usr/src/processing/build/
 
-echo "build:"
-mkdir -p temp/app/app
-mv ./build/* ./temp/app/app/
-
-
 /usr/src/app/node_modules/.bin/babel \
-  ./temp/app/app/ \
-  --out-dir ./temp/typescript-transpilation/ \
-  --source-maps "both" \
+  ./build/ \
+  --out-dir ./typescript-transpilation/ \
+  --source-maps "true" \
   --extensions ".ts,.js"
-
-mv ./temp/typescript-transpilation/* ./typescript-transpilation/
 
 rm -Rf ./build
 mv typescript-transpilation /usr/src/build
@@ -99,7 +92,7 @@ cd /usr/src/processing/
 mkdir /usr/src/processing/built-mu
 /usr/src/app/node_modules/.bin/babel \
   /usr/src/processing/helpers/mu/ \
-  --source-maps "both" \
+  --source-maps "true" \
   --out-dir /usr/src/processing/built-mu \
   --extensions ".js,.ts"
 
@@ -112,4 +105,4 @@ cp -R /usr/src/processing/built-mu /usr/src/build/node_modules/mu
 ## We have created garbage, let's remove it
 cd /usr/src/
 
-rm -Rf /usr/src/processing
+#rm -Rf /usr/src/processing

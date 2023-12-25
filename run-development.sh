@@ -58,6 +58,8 @@ fi
 
 ./transpile-sources.sh
 
+docker-rsync --include="*/" --include="*.ts" --include="*.coffee" --exclude="*" /app/ /usr/src/build/
+
 
 
 ##############
@@ -65,7 +67,6 @@ fi
 ##############
 
 cd /usr/src/build/
-/usr/src/app/node_modules/.bin/babel-node \
+node \
     --inspect="0.0.0.0:9229" \
-    --enable-source-maps \
     ./app.js
