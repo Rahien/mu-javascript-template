@@ -30,9 +30,6 @@ source /template/helpers.sh
 # and use absolute paths
 cd /template
 
-# prepare the build folders
-mkdir /dist /build.coffee
-
 # make the build and move to coffeescript-transpilation
 /template/node_modules/.bin/coffee -M -m --compile -t --output /app/dist /app/src
 
@@ -45,3 +42,4 @@ mkdir /dist /build.coffee
   --out-dir /app/dist/ \
   --source-maps "true" \
   --extensions ".ts,.js"
+
