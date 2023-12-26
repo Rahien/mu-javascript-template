@@ -19,44 +19,29 @@ source /template/helpers.sh
 # rm -f /processing/app/package.json
 
 
-# ## CoffeeScript
-# ##
-# ## Coffeescript is transpiled ready for nodejs.  This is then moved into
-# ## app so we have the javascript available which other preprocessors may
-# ## expect to exist.
-# ##
-# ## In order to generate the sourcemaps correctly, it seems we have to be
-# ## next to the folder where we want the sources to land, but in order to
-# ## transpile correctly we also need the node_modules for babel and the
-# ## babelrc file.  We temporarily move those around.
+## CoffeeScript
+##
+## Coffeescript is transpiled ready for nodejs.  This is then moved into
+## app so we have the javascript available which other preprocessors may
+## expect to exist.
+##
 
-# # prepare the build folders
-# mkdir /dist /build.coffee
-# cp -R /processing/app/* /usr/src/build/
-# cp /usr/src/processing/babel.config.json /usr/src/
-# cp -R /usr/src/processing/node_modules/ /usr/src/
+# our babel config is in /template let's run all commands from there
+# and use absolute paths
+cd /template
 
-# # make the build and move to coffeescript-transpilation
-# /usr/src/app/node_modules/.bin/coffee -M -m --compile -t --output ./build.coffee/ ./build
-# mv build.coffee/ /usr/src/processing/coffeescript-transpilation
+# prepare the build folders
+mkdir /dist /build.coffee
 
-# # clean up
-# rm -Rf /usr/src/build /usr/src/node_modules/
-# rm /usr/src/babel.config.json
+# make the build and move to coffeescript-transpilation
+/template/node_modules/.bin/coffee -M -m --compile -t --output /app/dist /app/src
 
 ## TypeScript and ES6
 ##
 ## Transpiles TypeScript and ES6 to something nodejs wants to run.
-cd /template
 
 /template/node_modules/.bin/babel \
   /app/src \
   --out-dir /app/dist/ \
   --source-maps "true" \
   --extensions ".ts,.js"
-
-# # We move the coffeescript files again because the previous step will
-# # have built the sources coffeescript generated, but these sources were
-# # already node compliant.  We could make coffeescript emit ES6 and
-# # transpile them to nodejs in this step, but that breaks SourceMaps.
-# docker-rsync /usr/src/processing/coffeescript-transpilation/ /usr/src/build/
