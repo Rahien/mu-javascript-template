@@ -55,6 +55,15 @@ docker-rsync /template/node_modules/ /app/node_modules/
 ##############
 
 cd /app/
-node \
-    --inspect="0.0.0.0:9229" \
-    ./dist/app.js
+if [ "$NO_BABEL_NODE" == "true" ]
+then
+    echo "running without babel-node"
+    node \
+        --inspect="0.0.0.0:9229" \
+        ./dist/app.js
+else
+    /template/node_modules/.bin/babel-node \
+        --enable-source-maps \
+        --inspect="0.0.0.0:9229" \
+        ./dist/app.js
+fi

@@ -30,8 +30,9 @@ source /template/helpers.sh
 # and use absolute paths
 cd /template
 
-# make the build and move to coffeescript-transpilation
-/template/node_modules/.bin/coffee -M -m --compile -t --output /app/dist /app/src
+# build coffeescript (note: don't use -M as it seems vscode is confused about inline sourcemaps)
+# chrome still happily works with .map files too though so we're all good!
+/template/node_modules/.bin/coffee -m --compile -t --output /app/dist /app/src
 
 ## TypeScript and ES6
 ##
