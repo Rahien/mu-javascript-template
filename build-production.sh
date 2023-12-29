@@ -1,36 +1,37 @@
 #!/bin/bash
+source /template/helpers.sh
 
 # Builds sources in production
 #
-# We want to compare the used sources from the one available in /app/src/
+# We want to compare the used sources from the one available in /app/
 # so we can warn at runtime in case developers accidentally mount
 # sources without setting the development environment variable.
 
 # Copy sources from /app to where they can be built
 cd /app
-rm -rf /app/dist
-mkdir /app/dist
+mkdir -p /build/dist /build/src
 
 mkdir -p /config /config.original
 
-if [[ "$(ls -A /app/config/ 2> /dev/null)" ]]
+if [[ "$(ls -A /config/ 2> /dev/null)" ]]
 then
-    cp -r /app/config/* /config.original/
-    cp -r /app/config/* /config/
+    cp -r /config/* /config.original/
+    cp -r /config/* /build/src/config/
 fi
 
 cp -r /app /app.original
+docker-rsync /app/ /build/src/
 
 # Install custom packages if need be
-if [ -f /app/src/package.json ]
+if [ -f /app/package.json ]
 then
     echo "Running npm install"
-    cd /app/
-    cp /app/src/package.json /app/package.json
+    cd /build/
+    cp /app/package.json /build/package.json
     npm install
 fi
 
 # add node modules from template back in
-docker-rsync /template/node_modules/ /app/node_modules/
+docker-rsync /template/node_modules/ /build/node_modules/
 
 /template/transpile-sources.sh

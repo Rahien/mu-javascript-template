@@ -11,7 +11,14 @@ source /template/helpers.sh
 # - Only run npm install when the package.json has changed.
 
 # Move to right folder
-cd /app/
+mkdir -p /app /build/src
+rm -rf /build/src
+mkdir -p /build/src
+
+docker-rsync /app/ /build/src/
+
+cd /build/
+rm -rf /build/src/dist
 
 
 
@@ -20,28 +27,29 @@ cd /app/
 ######################
 
 ## Check if package.json existed and did not change since previous build (/usr/src/app/app/ is copied later in this script, at first run from the template itself it doesn't exist but that's fine for comparison)
-cmp -s /check/package.json /app/src/package.json
+cmp -s /check/package.json /app/package.json
 CHANGE_IN_PACKAGE_JSON="$?"
 
 ## Copy config folder
 if [[ "$(ls -A /config/ 2> /dev/null)" ]]
 then
-    mkdir -p /app/src/config/
-    cp -rf /config/* /app/src/config/
+    cp -rf /config/* /build/src/config/
 fi
 
 ## Install dependencies on first boot
-if [ $CHANGE_IN_PACKAGE_JSON != "0" ] && [ -f /app/src/package.json ]
+if [ $CHANGE_IN_PACKAGE_JSON != "0" ] && [ -f /app/package.json ]
 then
     echo "Running npm install"
-    cp /app/src/package.json /app/package.json
+    cp /app/package.json /build/package.json
     npm install
     rm -rf /check
     mkdir /check
-    cp /app/src/package.json /check/package.json
+    cp /app/package.json /check/package.json
 fi
 
-docker-rsync /template/node_modules/ /app/node_modules/
+# template node modules should take priority over package modules
+# and if there are no package modules, this way we at least have the template ones
+docker-rsync /template/node_modules/ /build/node_modules/
 
 ###############
 # Transpilation
@@ -54,7 +62,7 @@ docker-rsync /template/node_modules/ /app/node_modules/
 # Start server
 ##############
 
-cd /app/
+cd /build/
 if [ "$NO_BABEL_NODE" == "true" ]
 then
     echo "running without babel-node"

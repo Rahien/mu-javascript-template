@@ -11,5 +11,5 @@
     ["@babel/preset-typescript"]
   ],
   "plugins": [["@babel/plugin-proposal-decorators", { "version": "2023-05" }]],
-  "ignore": ["./node_modules", "/app/src/node_modules"]
+  "ignore": ["./node_modules", "/build/src/node_modules"]
 }

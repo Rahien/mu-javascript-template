@@ -5,9 +5,9 @@ if [ "$NODE_ENV" == "development" ]
 then
     # Run live-reload development
     exec /template/node_modules/.bin/nodemon \
-         --watch /app/src \
+         --watch /app \
          --watch /config \
-         --ignore /app/src/dist \
+         --ignore /app/dist \
          --ext js,coffee,ts,mjs,cjs,json \
          --exec /template/run-development.sh
 elif [ "$NODE_ENV" == "production" ]
@@ -18,7 +18,7 @@ then
     diff -rq /config /config.original > /dev/null
     CONFIG_FILES_CHANGED="$?"
 
-    if [ ! -f /app/dist/app.js ]
+    if [ ! -f /build/dist/app.js ]
     then
         echo "No built sources found.  If you mount new sources, please set the NODE_ENV=\"development\" environment variable."
         sleep 5;
@@ -35,8 +35,8 @@ then
         # move new configuration into app for transpilation
         if [[ "$(ls -A /config 2> /dev/null)" ]]
         then
-            mkdir -p /app/src/config/
-            cp -Rf /config/* /app/src/config/
+            mkdir -p /build/src/config
+            cp -Rf /config/* /build/src/config/
         fi
 
         # make a backup of the used configuration so we can detect changes
@@ -51,7 +51,7 @@ then
         cd /app/
 
         # add node modules from template back in
-        docker-rsync /template/node_modules/ /app/node_modules/
+        docker-rsync /template/node_modules/ /build/node_modules/
         /template/transpile-sources.sh
 
         # boot transpiled sources
@@ -60,7 +60,7 @@ then
     else
         cd /app/
         # add node modules from template back in
-        docker-rsync /template/node_modules/ /app/node_modules/
+        docker-rsync /template/node_modules/ /build/node_modules/
         exec node /app/dist/app.js
     fi
 fi

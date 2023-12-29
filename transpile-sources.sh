@@ -32,15 +32,15 @@ cd /template
 
 # build coffeescript (note: don't use -M as it seems vscode is confused about inline sourcemaps)
 # chrome still happily works with .map files too though so we're all good!
-/template/node_modules/.bin/coffee -m --compile -t --output /app/dist /app/src
+/template/node_modules/.bin/coffee -m --compile -t --output /build/dist /build/src
 
 ## TypeScript and ES6
 ##
 ## Transpiles TypeScript and ES6 to something nodejs wants to run.
 
 /template/node_modules/.bin/babel \
-  /app/src \
-  --out-dir /app/dist/ \
+  /build/src \
+  --out-dir /build/dist/ \
   --source-maps "true" \
   --extensions ".ts,.js"
 
