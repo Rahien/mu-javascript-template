@@ -1,0 +1,13 @@
+{
+  "name": "@types/mu",
+  "version": "0.0.1",
+  "projects": [
+    "https://github.com/mu-semtech/mu-javascript-template"
+  ],
+  "author": "Aad Versteden <aad.versteden@gmail.com>",
+  "types": "index.d.ts",
+  "devDependencies": {
+    "express": "^4.17.1",
+    "typescript": "^5.3.3"
+  }
+}
