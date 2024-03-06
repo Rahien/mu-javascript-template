@@ -33,6 +33,7 @@ CHANGE_IN_PACKAGE_JSON="$?"
 ## Copy config folder
 if [[ "$(ls -A /config/ 2> /dev/null)" ]]
 then
+    mkdir -p /build/src/config
     cp -rf /config/* /build/src/config/
 fi
 
@@ -45,16 +46,20 @@ then
     rm -rf /check
     mkdir /check
     cp /app/package.json /check/package.json
+    echo "npm install done"
 fi
 
+echo "copying template modules..."
 # template node modules should take priority over package modules
 # and if there are no package modules, this way we at least have the template ones
-docker-rsync /template/node_modules/ /build/node_modules/
+docker-rsync --ignore-existing /template/node_modules/ /build/node_modules/
+echo "template modules copied"
 
 ###############
 # Transpilation
 ###############
 
+echo "transpiling..."
 /template/transpile-sources.sh
 
 
