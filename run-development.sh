@@ -15,7 +15,7 @@ mkdir -p /app /build/src
 rm -rf /build/src
 mkdir -p /build/src
 
-docker-rsync /app/ /build/src/
+docker-rsync --exclude 'node_modules' /app/ /build/src/
 
 cd /build/
 rm -rf /build/src/dist
