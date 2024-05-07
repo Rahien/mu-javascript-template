@@ -8,7 +8,7 @@ then
          --watch /app \
          --watch /config \
          --ignore /app/dist \
-         --ext js,coffee,ts,mjs,cjs,json \
+         --ext js,coffee,ts,mjs,cjs,json,ttl \
          --exec /template/run-development.sh
 elif [ "$NODE_ENV" == "production" ]
 then
