@@ -14,26 +14,29 @@ ENV PORT '80'
 ENV LOG_SPARQL_ALL 'true'
 ENV DEBUG_AUTH_HEADERS 'true'
 
-WORKDIR /usr/src/app
-COPY package.json /usr/src/app/package.json
-COPY ./scripts /app/scripts
-RUN npm install
-COPY . /usr/src/app
-RUN chmod +x /usr/src/app/run-development.sh
-RUN chmod +x /usr/src/app/build-production.sh
+WORKDIR /app
+RUN mkdir /template && mkdir -p /app/src
+COPY package.json /template/package.json
+COPY ./scripts /template/scripts
+RUN cd /template && npm install
+COPY . /template
+RUN chmod +x /template/run-development.sh
+RUN chmod +x /template/build-production.sh
+RUN chmod +x /template/build-template-package.sh
+RUN /template/build-template-package.sh
 
 EXPOSE ${PORT}
 
-CMD bash boot.sh
+CMD bash /template/boot.sh
 
 # This stuff only runs when building an image from the template
-ONBUILD RUN rm -Rf /app/scripts
-ONBUILD ADD . /app/
-ONBUILD RUN /usr/src/app/build-production.sh
+ONBUILD RUN rm -Rf /app/src/scripts
+ONBUILD ADD . /app/src
+ONBUILD RUN /template/build-production.sh
 
-ONBUILD RUN if [ -f /app/on-build.sh ]; \
+ONBUILD RUN if [ -f /app/src/on-build.sh ]; \
      then \
         echo "Running custom on-build.sh of child" \
-        && chmod +x /app/on-build.sh \
-        && /bin/bash /app/on-build.sh ;\
+        && chmod +x /app/src/on-build.sh \
+        && /bin/bash /app/src/on-build.sh ;\
      fi

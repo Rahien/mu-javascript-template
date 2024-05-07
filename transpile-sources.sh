@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./helpers.sh
+source /template/helpers.sh
 
 ####
 #### BUILDS SOURCES
@@ -9,14 +9,14 @@ source ./helpers.sh
 #### /usr/src/app/app/ and stores the resulting build in /usr/src/build
 
 # Clean starting state
-rm -Rf /usr/src/processing /usr/src/build
+# rm -Rf /processing /dist
 
-# Copy template (/usr/src/app/) and app (/usr/src/app/app/) sources
-# without package.json, which we want to skip as it would conflict
-# building sources.
+# # Copy template (/usr/src/app/) and app (/usr/src/app/app/) sources
+# # without package.json, which we want to skip as it would conflict
+# # building sources.
 
-cp -R /usr/src/app /usr/src/processing
-rm -f /usr/src/processing/app/package.json
+# cp -R /template /processing
+# rm -f /processing/app/package.json
 
 
 ## CoffeeScript
@@ -25,84 +25,22 @@ rm -f /usr/src/processing/app/package.json
 ## app so we have the javascript available which other preprocessors may
 ## expect to exist.
 ##
-## In order to generate the sourcemaps correctly, it seems we have to be
-## next to the folder where we want the sources to land, but in order to
-## transpile correctly we also need the node_modules for babel and the
-## babelrc file.  We temporarily move those around.
 
-cd /usr/src/
+# our babel config is in /template let's run all commands from there
+# and use absolute paths
+cd /template
 
-# prepare the build folders
-mkdir /usr/src/build /usr/src/build.coffee
-cp -R /usr/src/processing/app/* /usr/src/build/
-cp /usr/src/processing/babel.config.json /usr/src/
-cp -R /usr/src/processing/node_modules/ /usr/src/
-
-# make the build and move to coffeescript-transpilation
-/usr/src/app/node_modules/.bin/coffee -M -m --compile -t --output ./build.coffee/ ./build
-mv build.coffee/ /usr/src/processing/coffeescript-transpilation
-
-# clean up
-rm -Rf /usr/src/build /usr/src/node_modules/
-rm /usr/src/babel.config.json
+# build coffeescript (note: don't use -M as it seems vscode is confused about inline sourcemaps)
+# chrome still happily works with .map files too though so we're all good!
+/template/node_modules/.bin/coffee -m --compile -t --output /app/dist /app/src
 
 ## TypeScript and ES6
 ##
 ## Transpiles TypeScript and ES6 to something nodejs wants to run.
-cd /usr/src/processing/
 
-mkdir typescript-transpilation build
-cp -R ./app/* build
-
-docker-rsync /usr/src/processing/coffeescript-transpilation/ /usr/src/processing/build/
-
-/usr/src/app/node_modules/.bin/babel \
-  ./build/ \
-  --out-dir ./typescript-transpilation/ \
-  --source-maps true \
+/template/node_modules/.bin/babel \
+  /app/src \
+  --out-dir /app/dist/ \
+  --source-maps "true" \
   --extensions ".ts,.js"
 
-rm -Rf ./build
-mv typescript-transpilation /usr/src/build
-
-# We move the coffeescript files again because the previous step will
-# have built the sources coffeescript generated, but these sources were
-# already node compliant.  We could make coffeescript emit ES6 and
-# transpile them to nodejs in this step, but that breaks SourceMaps.
-docker-rsync /usr/src/processing/coffeescript-transpilation/ /usr/src/build/
-
-
-##############
-# Node modules
-##############
-cd /usr/src/processing/
-
-## template modules
-cp -R /usr/src/processing/node_modules /usr/src/build/
-
-## app modules
-if [ -d /usr/src/processing/app/node_modules ]
-then
-  docker-rsync /usr/src/processing/app/node_modules /usr/src/build/
-fi
-
-## mu helpers
-cd /usr/src/processing/
-
-mkdir /usr/src/processing/built-mu
-/usr/src/app/node_modules/.bin/babel \
-  /usr/src/processing/helpers/mu/ \
-  --source-maps true \
-  --out-dir /usr/src/processing/built-mu \
-  --extensions ".js"
-
-cp -R /usr/src/processing/built-mu /usr/src/build/node_modules/mu
-
-
-
-## Clean temporary folders
-##
-## We have created garbage, let's remove it
-cd /usr/src/
-
-rm -Rf /usr/src/processing
